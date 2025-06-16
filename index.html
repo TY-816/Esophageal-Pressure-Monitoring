@@ -84,7 +84,7 @@
       <label>Pes Min: <input type="number" id="spesMin"></label>
       <div id="deltaSpesResult" class="result"></div>
       <label>P<sub>trans</sub> Max: <input type="number" id="sptransMax"></label>
-      <label>P<sub>trans</sub> Min: <input type="number" id="sptransMin"></label>
+      <label>P<sub>trans</sub> Min: <input type="number" id="sptransMin"> <span style="font-weight: normal;">(0–3 cmH₂O)</span></label>
       <div id="deltaSptransResult" class="result"></div>
       <button onclick="calculateSpontGuidance()">Evaluate</button>
     </div>
@@ -141,36 +141,49 @@
     }
 
     function calculatePassiveGuidance() {
-      const pawEndExp = parseFloat(document.getElementById('ppawEndExp').value);
-      const pesEndExp = parseFloat(document.getElementById('ppesEndExp').value);
-      const pawEndInsp = parseFloat(document.getElementById('ppawEndInsp').value);
-      const pesEndInsp = parseFloat(document.getElementById('ppesEndInsp').value);
+  const pawEndExp = parseFloat(document.getElementById('ppawEndExp').value);
+  const pesEndExp = parseFloat(document.getElementById('ppesEndExp').value);
+  const pawEndInsp = parseFloat(document.getElementById('ppawEndInsp').value);
+  const pesEndInsp = parseFloat(document.getElementById('ppesEndInsp').value);
 
-      const ptransEndExp = pawEndExp - pesEndExp;
-      const ptransEndInsp = pawEndInsp - pesEndInsp;
-      const ptransDriving = ptransEndInsp - ptransEndExp;
+  const ptransEndExp = pawEndExp - pesEndExp;
+  const ptransEndInsp = pawEndInsp - pesEndInsp;
+  const ptransDriving = ptransEndInsp - ptransEndExp;
 
-      document.getElementById('ptransEndExpResult').innerHTML = `P<sub>trans</sub><sub>end-exp</sub> = ${ptransEndExp} cmH₂O ` + (ptransEndExp >= 0 && ptransEndExp <= 3 ? `<span class="green">✔️</span>` : `<span class="red">❌</span>`);
-      document.getElementById('ptransEndInspResult').innerHTML = `P<sub>trans</sub><sub>end-insp</sub> = ${ptransEndInsp} cmH₂O ` + (ptransEndInsp <= 20 ? `<span class="green">✔️</span>` : `<span class="red">❌</span>`);
-      document.getElementById('ptransDrivingResult').innerHTML = `P<sub>trans</sub> driving pressure = ${ptransDriving} cmH₂O ` + (ptransDriving <= 12 ? `<span class="green">✔️</span>` : `<span class="red">❌</span>`);
-    }
+  const expColor = (ptransEndExp >= 0 && ptransEndExp <= 3) ? 'green' : 'red';
+  const inspColor = (ptransEndInsp <= 20) ? 'green' : 'red';
+  const driveColor = (ptransDriving <= 12) ? 'green' : 'red';
 
+  document.getElementById('ptransEndExpResult').innerHTML =
+    `P<sub>trans</sub><sub>end-exp</sub> = <span class="${expColor}">${ptransEndExp}</span> cmH₂O 
+    <br><span style="font-weight: normal;">(Recommendation: Adjust PEEP in a step-wise approach to achieve P<sub>trans</sub><sub>end-exp</sub> of 0–3 cmH₂O. This minimizes de-recruitment.)</span>`;
+
+  document.getElementById('ptransEndInspResult').innerHTML =
+    `P<sub>trans</sub><sub>end-insp</sub> = <span class="${inspColor}">${ptransEndInsp}</span> cmH₂O 
+    <span style="font-weight: normal;">(Aim &lt; 15–20 cmH₂O)</span>`;
+
+  document.getElementById('ptransDrivingResult').innerHTML =
+    `P<sub>trans</sub> driving pressure = <span class="${driveColor}">${ptransDriving}</span> cmH₂O 
+    <span style="font-weight: normal;">(Aim &lt; 10–12 cmH₂O)</span>`;
+}
     function calculateSpontGuidance() {
-      const pesMax = parseFloat(document.getElementById('spesMax').value);
-      const pesMin = parseFloat(document.getElementById('spesMin').value);
-      const ptransMax = parseFloat(document.getElementById('sptransMax').value);
-      const ptransMin = parseFloat(document.getElementById('sptransMin').value);
+  const pesMax = parseFloat(document.getElementById('spesMax').value);
+  const pesMin = parseFloat(document.getElementById('spesMin').value);
+  const ptransMax = parseFloat(document.getElementById('sptransMax').value);
+  const ptransMin = parseFloat(document.getElementById('sptransMin').value);
 
-      const deltaPes = pesMax - pesMin;
-      const deltaPtrans = ptransMax - ptransMin;
+  const deltaPes = pesMax - pesMin;
+  const deltaPtrans = ptransMax - ptransMin;
 
-      const deltaPesColor = (deltaPes <= -3 && deltaPes >= -12) ? 'green' : 'red';
-      const deltaPtransColor = (deltaPtrans <= 20) ? 'green' : 'red';
-      const ptransMinColor = (ptransMin >= 0 && ptransMin <= 3) ? 'green' : 'red';
+  const deltaPesColor = (deltaPes <= -3 && deltaPes >= -12) ? 'green' : 'red';
+  const deltaPtransColor = (deltaPtrans <= 20) ? 'green' : 'red';
 
-      document.getElementById('deltaSpesResult').innerHTML = `ΔPes = <span class="${deltaPesColor}">${deltaPes}</span> cmH₂O`;
-      document.getElementById('deltaSptransResult').innerHTML = `ΔPtrans = <span class="${deltaPtransColor}">${deltaPtrans}</span> cmH₂O, P<sub>trans</sub> Min = <span class="${ptransMinColor}">${ptransMin}</span> cmH₂O`;
-    }
+  document.getElementById('deltaSpesResult').innerHTML =
+    `ΔPes = <span class="${deltaPesColor}">${deltaPes}</span> cmH₂O <span style="font-weight: normal;">(Range: -3 to -12 cmH₂O)</span>`;
+
+  document.getElementById('deltaSptransResult').innerHTML =
+    `ΔPtrans = <span class="${deltaPtransColor}">${deltaPtrans}</span> cmH₂O <span style="font-weight: normal;">(&lt;15–20 cmH₂O)</span>`;
+}
   </script>
 </body>
 </html>
