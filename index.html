@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Esophageal Pressure Monitoring Tool</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { margin-top: 30px; }
+    .section { margin-bottom: 20px; }
+    .checklist label { display: block; margin-bottom: 5px; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; margin-top: 10px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+    .result { font-weight: bold; margin-top: 10px; }
+    .hidden { display: none; }
+    input[type="number"] { width: 100px; margin-left: 5px; }
+    .green { color: green; }
+    .red { color: red; }
+    sub { font-size: 0.8em; }
+    .note { margin-top: 10px; font-style: italic; color: #333; }
+    .green-bg { background-color: #e6f4ea; }
+    .yellow-bg { background-color: #fffbe6; }
+    .blue-bg { background-color: #e6f0fa; }
+  </style>
+</head>
+<body>
+  <h1>Esophageal Pressure Monitoring – Measurement Phase</h1>
+
+  <div class="section green-bg">
+    <h2>Confirm Optimal Catheter Position</h2>
+  </div>
+
+  <div class="section checklist">
+    <label><input type="checkbox"> 10.1 Confirm optimal catheter position</label>
+    <label><input type="checkbox"> 10.2 Check catheter marking at nares</label>
+    <label><input type="checkbox"> 10.3 Deflate balloon fully, inflate with 5ml, then withdraw 3.5ml (leave 1.5ml)</label>
+  </div>
+
+  <div class="section yellow-bg">
+    <h2>Confirm Catheter Position</h2>
+    <label><input type="radio" name="patientType" value="passive"> Passive Ventilated</label>
+    <label><input type="radio" name="patientType" value="spontaneous"> Spontaneously Breathing</label>
+  </div>
+
+  <div id="passiveSection" class="card hidden">
+    <h3>Passive Patient Input</h3>
+    <p>One clinician should perform an end-expiration pause maneuver while the other performs gentle external chest compressions.</p>
+    <label>Pes Max: <input type="number" id="pPesMax"></label>
+    <label>Pes Min: <input type="number" id="pPesMin"></label>
+    <label>Paw Max: <input type="number" id="pPawMax"></label>
+    <label>Paw Min: <input type="number" id="pPawMin"></label>
+    <button onclick="calculatePassive()">Calculate</button>
+    <div id="passiveResult" class="result"></div>
+  </div>
+
+  <div id="spontSection" class="card hidden">
+    <h3>Spontaneous Patient Input</h3>
+    <label>Pes Pre: <input type="number" id="sPesPre"></label>
+    <label>Pes Post: <input type="number" id="sPesPost"></label>
+    <label>Paw Pre: <input type="number" id="sPawPre"></label>
+    <label>Paw Post: <input type="number" id="sPawPost"></label>
+    <button onclick="calculateSpont()">Calculate</button>
+    <div id="spontResult" class="result"></div>
+  </div>
+
+  <div id="suggestedUseSection" class="section blue-bg hidden">
+    <h2>Suggested Use of Esophageal Pressure to Titrate Ventilation</h2>
+
+    <div id="passiveGuidance" class="card hidden">
+      <h3>Passive Patient Ventilation Guidance</h3>
+      <label>Paw<sub>end-exp</sub>: <input type="number" id="ppawEndExp"></label>
+      <label>Pes<sub>end-exp</sub>: <input type="number" id="ppesEndExp"></label><br>
+      <div id="ptransEndExpResult" class="result"></div>
+      <label>Paw<sub>end-insp</sub>: <input type="number" id="ppawEndInsp"></label>
+      <label>Pes<sub>end-insp</sub>: <input type="number" id="ppesEndInsp"></label><br>
+      <div id="ptransEndInspResult" class="result"></div>
+      <div id="ptransDrivingResult" class="result"></div>
+      <button onclick="calculatePassiveGuidance()">Evaluate</button>
+      <div class="note">If end-inspiratory transpulmonary pressure (P<sub>trans</sub><sub>end-insp</sub>) or transpulmonary driving pressure (P<sub>trans</sub> driving pressure) are above target, consider reducing tidal volume to minimize volutrauma.</div>
+    </div>
+
+    <div id="spontGuidance" class="card hidden">
+      <h3>Spontaneously Breathing Patient Guidance</h3>
+      <label>Pes Max: <input type="number" id="spesMax"></label>
+      <label>Pes Min: <input type="number" id="spesMin"></label>
+      <div id="deltaSpesResult" class="result"></div>
+      <label>P<sub>trans</sub> Max: <input type="number" id="sptransMax"></label>
+      <label>P<sub>trans</sub> Min: <input type="number" id="sptransMin"></label>
+      <div id="deltaSptransResult" class="result"></div>
+      <button onclick="calculateSpontGuidance()">Evaluate</button>
+    </div>
+  </div>
+
+  <script>
+    const radioButtons = document.getElementsByName('patientType');
+    const passiveSection = document.getElementById('passiveSection');
+    const spontSection = document.getElementById('spontSection');
+    const suggestedUseSection = document.getElementById('suggestedUseSection');
+    const passiveGuidance = document.getElementById('passiveGuidance');
+    const spontGuidance = document.getElementById('spontGuidance');
+
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', () => {
+        passiveSection.classList.add('hidden');
+        spontSection.classList.add('hidden');
+        passiveGuidance.classList.add('hidden');
+        spontGuidance.classList.add('hidden');
+        suggestedUseSection.classList.remove('hidden');
+
+        if (radio.value === 'passive') {
+          passiveSection.classList.remove('hidden');
+          passiveGuidance.classList.remove('hidden');
+        } else {
+          spontSection.classList.remove('hidden');
+          spontGuidance.classList.remove('hidden');
+        }
+      });
+    });
+
+    function calculatePassive() {
+      const pesMax = parseFloat(document.getElementById('pPesMax').value);
+      const pesMin = parseFloat(document.getElementById('pPesMin').value);
+      const pawMax = parseFloat(document.getElementById('pPawMax').value);
+      const pawMin = parseFloat(document.getElementById('pPawMin').value);
+      const deltaPes = pesMax - pesMin;
+      const deltaPaw = pawMax - pawMin;
+      const ratio = (deltaPes / deltaPaw).toFixed(2);
+      const ratioColor = (ratio >= 0.8 && ratio <= 1.2) ? 'green' : 'red';
+      document.getElementById('passiveResult').innerHTML = `ΔPes = ${deltaPes}, ΔPaw = ${deltaPaw}, ΔPes / ΔPaw = <span class="${ratioColor}">${ratio}</span>`;
+    }
+
+    function calculateSpont() {
+      const pesPre = parseFloat(document.getElementById('sPesPre').value);
+      const pesPost = parseFloat(document.getElementById('sPesPost').value);
+      const pawPre = parseFloat(document.getElementById('sPawPre').value);
+      const pawPost = parseFloat(document.getElementById('sPawPost').value);
+      const deltaPes = pesPost - pesPre;
+      const deltaPaw = pawPost - pawPre;
+      const ratio = (deltaPes / deltaPaw).toFixed(2);
+      const ratioColor = (ratio >= 0.8 && ratio <= 1.2) ? 'green' : 'red';
+      document.getElementById('spontResult').innerHTML = `ΔPes = ${deltaPes}, ΔPaw = ${deltaPaw}, ΔPes / ΔPaw = <span class="${ratioColor}">${ratio}</span>`;
+    }
+
+    function calculatePassiveGuidance() {
+      const pawEndExp = parseFloat(document.getElementById('ppawEndExp').value);
+      const pesEndExp = parseFloat(document.getElementById('ppesEndExp').value);
+      const pawEndInsp = parseFloat(document.getElementById('ppawEndInsp').value);
+      const pesEndInsp = parseFloat(document.getElementById('ppesEndInsp').value);
+
+      const ptransEndExp = pawEndExp - pesEndExp;
+      const ptransEndInsp = pawEndInsp - pesEndInsp;
+      const ptransDriving = ptransEndInsp - ptransEndExp;
+
+      document.getElementById('ptransEndExpResult').innerHTML = `P<sub>trans</sub><sub>end-exp</sub> = ${ptransEndExp} cmH₂O ` + (ptransEndExp >= 0 && ptransEndExp <= 3 ? `<span class="green">✔️</span>` : `<span class="red">❌</span>`);
+      document.getElementById('ptransEndInspResult').innerHTML = `P<sub>trans</sub><sub>end-insp</sub> = ${ptransEndInsp} cmH₂O ` + (ptransEndInsp <= 20 ? `<span class="green">✔️</span>` : `<span class="red">❌</span>`);
+      document.getElementById('ptransDrivingResult').innerHTML = `P<sub>trans</sub> driving pressure = ${ptransDriving} cmH₂O ` + (ptransDriving <= 12 ? `<span class="green">✔️</span>` : `<span class="red">❌</span>`);
+    }
+
+    function calculateSpontGuidance() {
+      const pesMax = parseFloat(document.getElementById('spesMax').value);
+      const pesMin = parseFloat(document.getElementById('spesMin').value);
+      const ptransMax = parseFloat(document.getElementById('sptransMax').value);
+      const ptransMin = parseFloat(document.getElementById('sptransMin').value);
+
+      const deltaPes = pesMax - pesMin;
+      const deltaPtrans = ptransMax - ptransMin;
+
+      const deltaPesColor = (deltaPes <= -3 && deltaPes >= -12) ? 'green' : 'red';
+      const deltaPtransColor = (deltaPtrans <= 20) ? 'green' : 'red';
+      const ptransMinColor = (ptransMin >= 0 && ptransMin <= 3) ? 'green' : 'red';
+
+      document.getElementById('deltaSpesResult').innerHTML = `ΔPes = <span class="${deltaPesColor}">${deltaPes}</span> cmH₂O`;
+      document.getElementById('deltaSptransResult').innerHTML = `ΔPtrans = <span class="${deltaPtransColor}">${deltaPtrans}</span> cmH₂O, P<sub>trans</sub> Min = <span class="${ptransMinColor}">${ptransMin}</span> cmH₂O`;
+    }
+  </script>
+</body>
+</html>
