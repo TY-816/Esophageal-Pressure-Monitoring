@@ -44,20 +44,22 @@
   <div id="passiveSection" class="card hidden">
     <h3>Passive Patient Input</h3>
     <p>One clinician should perform an end-expiration pause maneuver while the other performs gentle external chest compressions.</p>
-    <label>Pes Max: <input type="number" id="pPesMax"></label>
-    <label>Pes Min: <input type="number" id="pPesMin"></label>
-    <label>Paw Max: <input type="number" id="pPawMax"></label>
-    <label>Paw Min: <input type="number" id="pPawMin"></label>
+    <label>Pes Max:<br><input type="number" id="pPesMax"></label><br>
+    <label>Pes Min:<br><input type="number" id="pPesMin"></label><br>
+    <label>Paw Max:<br><input type="number" id="pPawMax"></label><br>
+    <label>Paw Min:<br><input type="number" id="pPawMin"></label><br>
     <button onclick="calculatePassive()">Calculate</button>
     <div id="passiveResult" class="result"></div>
   </div>
 
   <div id="spontSection" class="card hidden">
     <h3>Spontaneous Patient Input</h3>
-    <label>Pes Pre: <input type="number" id="sPesPre"></label>
-    <label>Pes Post: <input type="number" id="sPesPost"></label>
-    <label>Paw Pre: <input type="number" id="sPawPre"></label>
-    <label>Paw Post: <input type="number" id="sPawPost"></label>
+    <p>Perform an end-expiration pause maneuver and measure the following pressures
+when the patient inhales against the occlusion.</p>
+    <label>Pes Max:<br><input type="number" id="sPesMax"></label><br>
+    <label>Pes Min:<br><input type="number" id="sPesMin"></label><br>
+    <label>Paw Max:<br><input type="number" id="sPawMax"></label><br>
+    <label>Paw Min:<br><input type="number" id="sPawMin"></label><br>
     <button onclick="calculateSpont()">Calculate</button>
     <div id="spontResult" class="result"></div>
   </div>
