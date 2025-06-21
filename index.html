@@ -69,26 +69,31 @@ when the patient inhales against the occlusion.</p>
 
     <div id="passiveGuidance" class="card hidden">
       <h3>Passive Patient Ventilation Guidance</h3>
-      <label>Paw<sub>end-exp</sub>: <input type="number" id="ppawEndExp"></label>
-      <label>Pes<sub>end-exp</sub>: <input type="number" id="ppesEndExp"></label><br>
-      <div id="ptransEndExpResult" class="result"></div>
-      <label>Paw<sub>end-insp</sub>: <input type="number" id="ppawEndInsp"></label>
-      <label>Pes<sub>end-insp</sub>: <input type="number" id="ppesEndInsp"></label><br>
-      <div id="ptransEndInspResult" class="result"></div>
-      <div id="ptransDrivingResult" class="result"></div>
+      <p>Perform an end-expiratory pause and take note of the following at end expiration.</p>
+      <label>Paw<sub>end-exp</sub>:<br><input type="number" id="ppawEndExp"></label><br>
+<label>Pes<sub>end-exp</sub>:<br><input type="number" id="ppesEndExp"></label><br>
+<div id="ptransEndExpResult" class="result"></div><br>
+
+<p>Perform an inspiratory pause maneuver and measure the following at end-inspiration.</p>
+
+<label>Paw<sub>end-insp</sub>:<br><input type="number" id="ppawEndInsp"></label><br>
+<label>Pes<sub>end-insp</sub>:<br><input type="number" id="ppesEndInsp"></label><br>      <div id="ptransEndInspResult" class="result"></div><br>
+      <div id="ptransDrivingResult" class="result"></div><br>
       <button onclick="calculatePassiveGuidance()">Evaluate</button>
       <div class="note">If end-inspiratory transpulmonary pressure (P<sub>trans</sub><sub>end-insp</sub>) or transpulmonary driving pressure (P<sub>trans</sub> driving pressure) are above target, consider reducing tidal volume to minimize volutrauma.</div>
     </div>
 
     <div id="spontGuidance" class="card hidden">
       <h3>Spontaneously Breathing Patient Guidance</h3>
-      <label>Pes Max: <input type="number" id="spesMax"></label>
-      <label>Pes Min: <input type="number" id="spesMin"></label>
-      <div id="deltaSpesResult" class="result"></div>
-      <label>P<sub>trans</sub> Max: <input type="number" id="sptransMax"></label>
-      <label>P<sub>trans</sub> Min: <input type="number" id="sptransMin"> <span style="font-weight: normal;">(0–3 cmH₂O)</span></label>
-      <div id="deltaSptransResult" class="result"></div>
+      <p>Ensure that patient has a stable breathing pattern. Freeze the ventilator screen and measure the following parameters.</p>
+      <label>Pes Max:<br><input type="number" id="spesMax"></label><br>
+      <label>Pes Min:<br><input type="number" id="spesMin"></label><br>
+      <div id="deltaSpesResult" class="result"></div><br>
+      <label>P<sub>trans</sub> Max:<br><input type="number" id="sptransMax"></label><br>
+      <label>P<sub>trans</sub> Min:<br><input type="number" id="sptransMin"> <span style="font-weight: normal;">(0–3 cmH₂O)</span></label><br>
+      <div id="deltaSptransResult" class="result"></div><br>
       <button onclick="calculateSpontGuidance()">Evaluate</button>
+
     </div>
   </div>
 
@@ -131,16 +136,17 @@ when the patient inhales against the occlusion.</p>
     }
 
     function calculateSpont() {
-      const pesPre = parseFloat(document.getElementById('sPesPre').value);
-      const pesPost = parseFloat(document.getElementById('sPesPost').value);
-      const pawPre = parseFloat(document.getElementById('sPawPre').value);
-      const pawPost = parseFloat(document.getElementById('sPawPost').value);
-      const deltaPes = pesPost - pesPre;
-      const deltaPaw = pawPost - pawPre;
-      const ratio = (deltaPes / deltaPaw).toFixed(2);
-      const ratioColor = (ratio >= 0.8 && ratio <= 1.2) ? 'green' : 'red';
-      document.getElementById('spontResult').innerHTML = `ΔPes = ${deltaPes}, ΔPaw = ${deltaPaw}, ΔPes / ΔPaw = <span class="${ratioColor}">${ratio}</span>`;
-    }
+  const pesMax = parseFloat(document.getElementById('sPesMax').value);
+  const pesMin = parseFloat(document.getElementById('sPesMin').value);
+  const pawMax = parseFloat(document.getElementById('sPawMax').value);
+  const pawMin = parseFloat(document.getElementById('sPawMin').value);
+  const deltaPes = pesMax - pesMin;
+  const deltaPaw = pawMax - pawMin;
+  const ratio = (deltaPes / deltaPaw).toFixed(2);
+  const ratioColor = (ratio >= 0.8 && ratio <= 1.2) ? 'green' : 'red';
+  document.getElementById('spontResult').innerHTML =
+    `ΔPes = ${deltaPes}, ΔPaw = ${deltaPaw}, ΔPes / ΔPaw = <span class="${ratioColor}">${ratio}</span>`;
+}
 
     function calculatePassiveGuidance() {
   const pawEndExp = parseFloat(document.getElementById('ppawEndExp').value);
